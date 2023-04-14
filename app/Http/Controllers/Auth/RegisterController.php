@@ -9,6 +9,10 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+use Illuminate\Http\Request;
+
+use PragmaRX\Google2FAQRCode\Google2FA;
+
 class RegisterController extends Controller
 {
     /*
@@ -22,7 +26,9 @@ class RegisterController extends Controller
     |
     */
 
-    use RegistersUsers;
+    use RegistersUsers {
+        register as registration;
+    }
 
     /**
      * Where to redirect users after registration.
@@ -69,5 +75,22 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validated();
+        $google2fa = app('pragmarx.google2fa');
+        $registration_data = $request->all();
+        $registration_data['google2fa_secret'] = $google2fa->generateSecretKey();
+        $request->session()->flash('registration_data', $registration_data);
+        $twofa = new Google2FA();
+        $key = $twofa->generateSecretKey();
+        $QR_image = $twofa->getQRCodeInline(
+            config('app.name'),
+            $registration_data['email'],
+            $registration_data['google2fa_secret']
+        );
+        $secret = $registration_data['google2fa_secret'];
+        return view('google2fa.register', compact('secret', 'QR_image'));
     }
 }

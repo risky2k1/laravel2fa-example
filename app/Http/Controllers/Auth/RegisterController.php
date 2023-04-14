@@ -74,6 +74,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'google2fa_secret' => $data['google2fa_secret'],
         ]);
     }
     public function register(Request $request)
@@ -92,5 +93,10 @@ class RegisterController extends Controller
         );
         $secret = $registration_data['google2fa_secret'];
         return view('google2fa.register', compact('secret', 'QR_image'));
+    }
+    public function completeRegistration(Request $request)
+    {
+        $request->merge(session('registration_data'));
+        return $this->registration($request);
     }
 }

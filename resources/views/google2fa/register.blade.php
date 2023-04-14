@@ -18,7 +18,7 @@
                             <img src="{{$QR_image}}" alt="QR_image">
                         </div>
                     </div>
-                    <a href="#"  class="btn btn-success">Hoàn thành việc thiết lập</a>
+                    <a href="{{route('complete.registration')}}"  class="btn btn-success">Hoàn thành việc thiết lập</a>
                 </div>
             </div>
         </div>
